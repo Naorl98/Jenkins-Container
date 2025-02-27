@@ -1,0 +1,38 @@
+services:
+  jenkins:
+    image: 324037305534.dkr.ecr.ap-south-1.amazonaws.com/jenkins-naor:1.0
+   
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"  # Enable Docker-in-Docker for Jenkins
+      - "/home/ubuntu/jenkins_home:/var/jenkins_home"  # Persistent Jenkins data storage
+      - /home/ubuntu/jenkins_ssh:/home/jenkins/.ssh
+    group_add:
+      - jenkins
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    restart: unless-stopped
+
+  artifactory:
+    container_name: artifactory
+    image: docker.bintray.io/jfrog/artifactory-oss:6.23.13
+    ports:
+      - "8081:8081"
+      - "8082:8082"
+    volumes:
+      - artifactory-data:/var/opt/jfrog/artifactory
+      - maven-repo:/var/opt/jfrog/artifacroty/ .m2/repository
+    environment:
+      - EXTRA_JAVA_OPTIONS=-Xms512m -Xmx2g
+    restart: unless-stopped
+
+volumes:
+  maven-repo:
+  artifactory-data:
+  jenkins_home:  # Define a persistent volume for Jenkins data
+

@@ -1,0 +1,23 @@
+echo "Build Stage"
+docker build -t cowsay .
+
+
+docker run --network=jenkins_jenkinsnet --name cowsayrun -d -p 8081:8080 cowsay
+echo "Test Stage"
+
+# Wait for application to start
+sleep 15
+echo "Testing from outside container:"
+curl -v http://cowsayrun:8080
+# Check if curl was successful
+if [ $? -eq 0 ]; then
+    echo "Test successful!"
+	sleep 10
+	docker stop cowsayrun
+	docker rm cowsayrun
+	exit 0
+else
+    echo "Test failed!"
+    exit 1
+fi
+
